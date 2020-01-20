@@ -5,6 +5,7 @@ from sklearn.utils import shuffle
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neural_network import MLPClassifier
 import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
 
 
 class StreamFromFile:
@@ -14,7 +15,7 @@ class StreamFromFile:
         self.X, self.y = self.data["X"], self.data["y"]
         self.X, self.y = shuffle(self.X, self.y, random_state=0)
         self.chunk_size = chunk_size
-        self.chunk_id = 0
+        self.chunk_id = -1
         self.chunk = None
         self.classes_ = np.unique(self.y)
         self.n_chunks = self.y.shape[0] // self.chunk_size
@@ -24,18 +25,23 @@ class StreamFromFile:
         return self.chunk_id >= (self.n_chunks - 1)
 
     def get_chunk(self):
+        self.chunk_id += 1
+        print("CHUNK %i" % self.chunk_id)
         self.previous_chunk = self.chunk
 
         start = self.chunk_id * self.chunk_size
         end = (self.chunk_id + 1) * self.chunk_size
         self.chunk = (self.X[start:end, :], self.y[start:end])
 
-        self.chunk_id += 1
         return self.chunk
 
 
 stream = StreamFromFile("data/cv.npz")
-clfs = [GaussianNB(), MLPClassifier()]
+clfs = [
+    GaussianNB(),
+    sl.ensembles.WAE(GaussianNB(), n_estimators=5),
+    sl.ensembles.SEA(GaussianNB(), n_estimators=5),
+]
 eval = sl.evaluators.TestThenTrain(metrics=(accuracy_score))
 eval.process(stream, clfs)
 
