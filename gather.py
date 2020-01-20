@@ -42,4 +42,4 @@ frames = [fake_news2, real_news2]
 news_dataset = pd.concat(frames)
 print(news_dataset)
 
-# news_dataset.to_csv("input/kaggle_news_dataset.csv", encoding="utf-8")
+news_dataset.to_csv("input/kaggle_news_dataset.csv", encoding="utf-8")

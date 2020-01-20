@@ -6,7 +6,7 @@ import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 
-n_features = 1000
+n_features = 2000
 crop = 0
 
 #

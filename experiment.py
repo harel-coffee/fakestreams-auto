@@ -9,7 +9,6 @@ from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, balanced_accuracy_score
 from sklearn.base import clone
 from scipy.stats import ttest_ind
-from exposing import EE
 from tqdm import tqdm
 from RS import RS
 
@@ -79,7 +78,8 @@ for n_features in [1000]:
 
     mean_scores = np.mean(scores, axis=1)
 
-    firsts = []
+    firsts = []from exposing import EE
+
     seconds = []
     for a, clfna in enumerate(clfs):
         signs = []
