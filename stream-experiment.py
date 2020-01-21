@@ -2,8 +2,11 @@ import numpy as np
 import strlearn as sl
 from sklearn.metrics import accuracy_score
 from sklearn.utils import shuffle
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neural_network import MLPClassifier
+from sklearn.svm import SVC
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 
@@ -22,7 +25,7 @@ class StreamFromFile:
         print(self.n_chunks)
 
     def is_dry(self):
-        return self.chunk_id >= (self.n_chunks - 1)
+        return self.chunk_id >= 1  # (self.n_chunks - 1)
 
     def get_chunk(self):
         self.chunk_id += 1
@@ -38,9 +41,16 @@ class StreamFromFile:
 
 stream = StreamFromFile("data/cv.npz")
 clfs = [
-    GaussianNB(),
     sl.ensembles.WAE(GaussianNB(), n_estimators=5),
     sl.ensembles.SEA(GaussianNB(), n_estimators=5),
+    sl.ensembles.WAE(KNeighborsClassifier(), n_estimators=5),
+    sl.ensembles.SEA(KNeighborsClassifier(), n_estimators=5),
+    sl.ensembles.WAE(MLPClassifier(), n_estimators=5),
+    sl.ensembles.SEA(MLPClassifier(), n_estimators=5),
+    sl.ensembles.WAE(SVC(probability=True), n_estimators=5),
+    sl.ensembles.SEA(SVC(probability=True), n_estimators=5),
+    sl.ensembles.WAE(DecisionTreeClassifier(), n_estimators=5),
+    sl.ensembles.SEA(DecisionTreeClassifier(), n_estimators=5),
 ]
 eval = sl.evaluators.TestThenTrain(metrics=(accuracy_score))
 eval.process(stream, clfs)
@@ -52,7 +62,8 @@ plt.ylim(0, 1)
 
 plt.savefig("foo.png")
 
-
 # for i in range(10):
 #    X, y = stream.get_chunk()
 #    print(y, np.unique(y, return_counts=True))
+
+np.save("results", eval.scores)
