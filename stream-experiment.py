@@ -90,7 +90,7 @@ for n_components in used_features:
     plt.clf()
 
     # CV
-    stream = StreamFromFile("data/cv.npz", n_components=10, n_chunks=3, use_PCA=False)
+    stream = StreamFromFile("data/cv.npz", n_components=10, n_chunks=10, use_PCA=False)
     clfs = [
         sl.ensembles.SEA(GaussianNB(), n_estimators=5),
         sl.ensembles.SEA(KNeighborsClassifier(), n_estimators=5),
