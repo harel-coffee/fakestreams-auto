@@ -15,6 +15,7 @@ BASE_CV = 1000
 
 methods = ["GNB", "KNN", "MLP", "SVC", "CART"]
 
+
 class StreamFromFile:
     def __init__(
         self, filename, chunk_size=250, n_components=4, n_chunks=None, use_PCA=True
@@ -62,17 +63,17 @@ class StreamFromFile:
 
 
 used_features = [2, 10, 50, 100, 200, 500, 1000]
-used_features = [1000]
 
 for n_components in used_features:
     # PCA
-    stream = StreamFromFile("data/cv.npz", n_components=10, n_chunks=3, use_PCA=True)
+    plt.figure()
+    stream = StreamFromFile("data/cv.npz", n_components=n_components, use_PCA=True)
     clfs = [
         sl.ensembles.SEA(GaussianNB(), n_estimators=5),
         sl.ensembles.SEA(KNeighborsClassifier(), n_estimators=5),
-        sl.ensembles.SEA(MLPClassifier(), n_estimators=5),
-        sl.ensembles.SEA(SVC(probability=True), n_estimators=5),
-        sl.ensembles.SEA(DecisionTreeClassifier(), n_estimators=5),
+        sl.ensembles.SEA(MLPClassifier(random_state=1410), n_estimators=5),
+        sl.ensembles.SEA(SVC(probability=True, random_state=1410), n_estimators=5),
+        sl.ensembles.SEA(DecisionTreeClassifier(random_state=1410), n_estimators=5),
     ]
     eval = sl.evaluators.TestThenTrain(metrics=(accuracy_score))
     eval.process(stream, clfs)
@@ -80,9 +81,11 @@ for n_components in used_features:
     print(eval.scores, eval.scores.shape)
     print(np.mean(eval.scores, axis=1))
 
-    plt.plot(np.squeeze(eval.scores).T)
+    # plt.plot(np.squeeze(eval.scores).T)
 
-    for value, label, mean in zip(np.squeeze(eval.scores), methods, np.mean(eval.scores, axis=1)):
+    for value, label, mean in zip(
+        np.squeeze(eval.scores), methods, np.mean(eval.scores, axis=1)
+    ):
         label += "\n{0:.3f}".format(mean[0])
         plt.plot(value, label=label)
 
@@ -104,16 +107,15 @@ for n_components in used_features:
 
     np.save("results/PCA_%i" % (n_components), eval.scores)
 
-    plt.clf()
-
     # CV
-    stream = StreamFromFile("data/cv.npz", n_components=10, n_chunks=3, use_PCA=False)
+    plt.figure()
+    stream = StreamFromFile("data/cv.npz", n_components=n_components, use_PCA=False)
     clfs = [
         sl.ensembles.SEA(GaussianNB(), n_estimators=5),
         sl.ensembles.SEA(KNeighborsClassifier(), n_estimators=5),
-        sl.ensembles.SEA(MLPClassifier(), n_estimators=5),
-        sl.ensembles.SEA(SVC(probability=True), n_estimators=5),
-        sl.ensembles.SEA(DecisionTreeClassifier(), n_estimators=5),
+        sl.ensembles.SEA(MLPClassifier(random_state=1410), n_estimators=5),
+        sl.ensembles.SEA(SVC(probability=True, random_state=1410), n_estimators=5),
+        sl.ensembles.SEA(DecisionTreeClassifier(random_state=1410), n_estimators=5),
     ]
     eval = sl.evaluators.TestThenTrain(metrics=(accuracy_score))
     eval.process(stream, clfs)
@@ -123,7 +125,9 @@ for n_components in used_features:
 
     # plt.plot(np.squeeze(eval.scores).T)
 
-    for value, label, mean in zip(np.squeeze(eval.scores), methods, np.mean(eval.scores, axis=1)):
+    for value, label, mean in zip(
+        np.squeeze(eval.scores), methods, np.mean(eval.scores, axis=1)
+    ):
         label += "\n{0:.3f}".format(mean[0])
         plt.plot(value, label=label)
 
