@@ -13,6 +13,7 @@ from sklearn.preprocessing import StandardScaler
 
 BASE_CV = 1000
 
+methods = ["GNB", "KNN", "MLP", "SVC", "CART"]
 
 class StreamFromFile:
     def __init__(
@@ -64,7 +65,7 @@ used_features = [2, 10, 50, 100, 200, 500]
 
 for n_components in used_features:
     # PCA
-    stream = StreamFromFile("data/cv.npz", n_components=10, n_chunks=10, use_PCA=True)
+    stream = StreamFromFile("data/cv.npz", n_components=10, n_chunks=3, use_PCA=True)
     clfs = [
         sl.ensembles.SEA(GaussianNB(), n_estimators=5),
         sl.ensembles.SEA(KNeighborsClassifier(), n_estimators=5),
@@ -79,6 +80,21 @@ for n_components in used_features:
     print(np.mean(eval.scores, axis=1))
 
     plt.plot(np.squeeze(eval.scores).T)
+
+    for value, label, mean in zip(np.squeeze(eval.scores), methods, np.mean(eval.scores, axis=1)):
+        label += "\n{0:.3f}".format(mean[0])
+        plt.plot(value, label=label)
+
+    plt.legend(
+        loc=8,
+        # bbox_to_anchor=(0.5, -0.1),
+        fancybox=False,
+        shadow=True,
+        ncol=5,
+        fontsize=8,
+        frameon=False,
+    )
+
     plt.ylim(0, 1)
     plt.title("PCA - %i" % n_components)
 
@@ -90,7 +106,7 @@ for n_components in used_features:
     plt.clf()
 
     # CV
-    stream = StreamFromFile("data/cv.npz", n_components=10, n_chunks=10, use_PCA=False)
+    stream = StreamFromFile("data/cv.npz", n_components=10, n_chunks=3, use_PCA=False)
     clfs = [
         sl.ensembles.SEA(GaussianNB(), n_estimators=5),
         sl.ensembles.SEA(KNeighborsClassifier(), n_estimators=5),
@@ -104,7 +120,22 @@ for n_components in used_features:
     print(eval.scores, eval.scores.shape)
     print(np.mean(eval.scores, axis=1))
 
-    plt.plot(np.squeeze(eval.scores).T)
+    # plt.plot(np.squeeze(eval.scores).T)
+
+    for value, label, mean in zip(np.squeeze(eval.scores), methods, np.mean(eval.scores, axis=1)):
+        label += "\n{0:.3f}".format(mean[0])
+        plt.plot(value, label=label)
+
+    plt.legend(
+        loc=8,
+        # bbox_to_anchor=(0.5, -0.1),
+        fancybox=False,
+        shadow=True,
+        ncol=5,
+        fontsize=8,
+        frameon=False,
+    )
+
     plt.ylim(0, 1)
     plt.title("CV - %i" % n_components)
 
