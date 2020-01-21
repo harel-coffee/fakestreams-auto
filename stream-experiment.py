@@ -61,7 +61,8 @@ class StreamFromFile:
         return self.chunk
 
 
-used_features = [2, 10, 50, 100, 200, 500]
+used_features = [2, 10, 50, 100, 200, 500, 1000]
+used_features = [1000]
 
 for n_components in used_features:
     # PCA
