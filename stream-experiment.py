@@ -64,7 +64,7 @@ used_features = [2, 10, 50, 100, 200, 500]
 
 for n_components in used_features:
     # PCA
-    stream = StreamFromFile("data/cv.npz", n_components=10, n_chunks=3, use_PCA=True)
+    stream = StreamFromFile("data/cv.npz", n_components=10, n_chunks=10, use_PCA=True)
     clfs = [
         sl.ensembles.SEA(GaussianNB(), n_estimators=5),
         sl.ensembles.SEA(KNeighborsClassifier(), n_estimators=5),

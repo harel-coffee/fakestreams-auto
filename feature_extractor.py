@@ -4,7 +4,7 @@ Extracting features using count vectorizer
 import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.preprocessing import StandardScaler
 
 n_features = 1000
 crop = 0
@@ -37,6 +37,12 @@ X_contents_cv = vectorizer.fit_transform(contents)
 
 X_titles = X_titles_cv.toarray()
 X_contents = X_contents_cv.toarray()
+
+scaler_a = StandardScaler().fit(X_titles)
+scaler_b = StandardScaler().fit(X_contents)
+
+X_titles = scaler_a.transform(X_titles)
+X_contents = scaler_a.transform(X_contents)
 
 print(np.max(X_titles, axis=0), X_titles.shape)
 print(np.max(X_contents, axis=0), X_contents.shape)
