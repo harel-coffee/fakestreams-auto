@@ -10,15 +10,18 @@ from sklearn.svm import SVC
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+from skmultiflow.trees import HoeffdingTree
+from sklearn.feature_selection import SelectKBest, chi2
 
 BASE_CV = 1000
 
-methods = ["GNB", "KNN", "MLP", "SVC", "CART"]
+methods = ["GNB", "MLP", "HT"]
+# methods = ["GNB"]
 
 
 class StreamFromFile:
     def __init__(
-        self, filename, chunk_size=250, n_components=4, n_chunks=None, use_PCA=True
+        self, filename, chunk_size=250, n_components=4, n_chunks=None, method=None,
     ):
         self.filename = filename
         self.data = np.load("data/cv.npz")
@@ -26,16 +29,24 @@ class StreamFromFile:
         self.X, self.y = shuffle(self.X, self.y, random_state=0)
         self.n_components = n_components
 
-        if use_PCA:
-            self.pca = PCA(self.n_components).fit(self.X)
+        if method == "PCA":
+            self.pca = PCA(self.n_components).fit(self.X[:1000,:])
             self.X = self.pca.transform(self.X)
 
-        else:
-            wordsum = np.sum(self.X, axis=0)
+        elif method == "CV":
+            wordsum = np.sum(self.X[:1000,:], axis=0)
             feature_sort = np.argsort(-wordsum)
 
             self.X = self.X[:, feature_sort]
             self.X = self.X[:, :n_components]
+        elif method == "FS":
+            self.fs = SelectKBest(score_func=chi2, k=self.n_components)
+            self.fs.fit(self.X[:1000,:], self.y[:1000])
+            self.X = self.fs.transform(self.X)
+        else:
+            print("Provide a method!")
+            exit()
+
 
         self.chunk_size = chunk_size
         self.chunk_id = -1
@@ -67,13 +78,11 @@ used_features = [2, 10, 50, 100, 200, 500, 1000]
 for n_components in used_features:
     # PCA
     plt.figure()
-    stream = StreamFromFile("data/cv.npz", n_components=n_components, use_PCA=True)
+    stream = StreamFromFile("data/cv.npz", n_components=n_components, method="PCA")
     clfs = [
         sl.ensembles.SEA(GaussianNB(), n_estimators=5),
-        sl.ensembles.SEA(KNeighborsClassifier(), n_estimators=5),
         sl.ensembles.SEA(MLPClassifier(random_state=1410), n_estimators=5),
-        sl.ensembles.SEA(SVC(probability=True, random_state=1410), n_estimators=5),
-        sl.ensembles.SEA(DecisionTreeClassifier(random_state=1410), n_estimators=5),
+        sl.ensembles.SEA(HoeffdingTree(), n_estimators=5),
     ]
     eval = sl.evaluators.TestThenTrain(metrics=(accuracy_score))
     eval.process(stream, clfs)
@@ -109,13 +118,11 @@ for n_components in used_features:
 
     # CV
     plt.figure()
-    stream = StreamFromFile("data/cv.npz", n_components=n_components, use_PCA=False)
+    stream = StreamFromFile("data/cv.npz", n_components=n_components, method="CV")
     clfs = [
         sl.ensembles.SEA(GaussianNB(), n_estimators=5),
-        sl.ensembles.SEA(KNeighborsClassifier(), n_estimators=5),
         sl.ensembles.SEA(MLPClassifier(random_state=1410), n_estimators=5),
-        sl.ensembles.SEA(SVC(probability=True, random_state=1410), n_estimators=5),
-        sl.ensembles.SEA(DecisionTreeClassifier(random_state=1410), n_estimators=5),
+        sl.ensembles.SEA(HoeffdingTree(), n_estimators=5),
     ]
     eval = sl.evaluators.TestThenTrain(metrics=(accuracy_score))
     eval.process(stream, clfs)
@@ -148,4 +155,46 @@ for n_components in used_features:
     plt.savefig("bar")
 
     np.save("results/CV_%i" % (n_components), eval.scores)
+    plt.clf()
+
+
+    # Feature selection
+    plt.figure()
+    stream = StreamFromFile("data/cv.npz", n_components=n_components, method="FS")
+    clfs = [
+        sl.ensembles.SEA(GaussianNB(), n_estimators=5),
+        sl.ensembles.SEA(MLPClassifier(random_state=1410), n_estimators=5),
+        sl.ensembles.SEA(HoeffdingTree(), n_estimators=5),
+    ]
+    eval = sl.evaluators.TestThenTrain(metrics=(accuracy_score))
+    eval.process(stream, clfs)
+
+    print(eval.scores, eval.scores.shape)
+    print(np.mean(eval.scores, axis=1))
+
+    # plt.plot(np.squeeze(eval.scores).T)
+
+    for value, label, mean in zip(
+        np.squeeze(eval.scores), methods, np.mean(eval.scores, axis=1)
+    ):
+        label += "\n{0:.3f}".format(mean[0])
+        plt.plot(value, label=label)
+
+    plt.legend(
+        loc=8,
+        # bbox_to_anchor=(0.5, -0.1),
+        fancybox=False,
+        shadow=True,
+        ncol=5,
+        fontsize=8,
+        frameon=False,
+    )
+
+    plt.ylim(0, 1)
+    plt.title("FS - %i" % n_components)
+
+    plt.savefig("figures/FS_%i" % (n_components))
+    plt.savefig("bas")
+
+    np.save("results/FS_%i" % (n_components), eval.scores)
     plt.clf()
