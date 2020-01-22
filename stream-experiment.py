@@ -21,8 +21,15 @@ methods = ["GNB", "MLP", "HT"]
 
 class StreamFromFile:
     def __init__(
-        self, filename, chunk_size=250, n_components=4, n_chunks=None, method=None,
+        self,
+        filename,
+        chunk_size=250,
+        n_components=4,
+        n_chunks=None,
+        method=None,
+        handicap=1000,
     ):
+        self.handicap = handicap
         self.filename = filename
         self.data = np.load("data/cv.npz")
         self.X, self.y = self.data["X"], self.data["y"]
@@ -30,28 +37,28 @@ class StreamFromFile:
         self.n_components = n_components
 
         if method == "PCA":
-            self.pca = PCA(self.n_components).fit(self.X[:1000,:])
+            self.pca = PCA(self.n_components).fit(self.X[: self.handicap, :])
             self.X = self.pca.transform(self.X)
-
         elif method == "CV":
-            wordsum = np.sum(self.X[:1000,:], axis=0)
+            wordsum = np.sum(self.X[: self.handicap, :], axis=0)
             feature_sort = np.argsort(-wordsum)
 
             self.X = self.X[:, feature_sort]
             self.X = self.X[:, :n_components]
         elif method == "FS":
             self.fs = SelectKBest(score_func=chi2, k=self.n_components)
-            self.fs.fit(self.X[:1000,:], self.y[:1000])
+            self.fs.fit(self.X[: self.handicap, :], self.y[: self.handicap])
             self.X = self.fs.transform(self.X)
         else:
             print("Provide a method!")
             exit()
 
-
         self.chunk_size = chunk_size
         self.chunk_id = -1
         self.chunk = None
         self.classes_ = np.unique(self.y)
+        self.X = self.X[self.handicap :]
+        self.y = self.y[self.handicap :]
         if n_chunks is not None:
             self.n_chunks = n_chunks
         else:
@@ -157,7 +164,6 @@ for n_components in used_features:
     np.save("results/CV_%i" % (n_components), eval.scores)
     plt.clf()
 
-
     # Feature selection
     plt.figure()
     stream = StreamFromFile("data/cv.npz", n_components=n_components, method="FS")
@@ -194,7 +200,7 @@ for n_components in used_features:
     plt.title("FS - %i" % n_components)
 
     plt.savefig("figures/FS_%i" % (n_components))
-    plt.savefig("bas")
+    plt.savefig("baz")
 
     np.save("results/FS_%i" % (n_components), eval.scores)
     plt.clf()
