@@ -12,6 +12,7 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from skmultiflow.trees import HoeffdingTree
 from sklearn.feature_selection import SelectKBest, chi2
+from strlearn.classifiers import SampleWeightedMetaEstimator
 
 BASE_CV = 1000
 
@@ -90,7 +91,10 @@ for n_components in used_features:
     stream = StreamFromFile("data/cv.npz", n_components=n_components, method="PCA")
     clfs = [
         sl.ensembles.OnlineBagging(GaussianNB(), n_estimators=5),
-        sl.ensembles.OnlineBagging(SampleWeightedMetaEstimator(MLPClassifier(random_state=1410), n_estimators=5)),
+        sl.ensembles.OnlineBagging(
+            SampleWeightedMetaEstimator(MLPClassifier(random_state=1410)),
+            n_estimators=5,
+        ),
         sl.ensembles.OnlineBagging(HoeffdingTree(), n_estimators=5),
     ]
     eval = sl.evaluators.TestThenTrain(metrics=(accuracy_score))
@@ -132,7 +136,10 @@ for n_components in used_features:
     stream = StreamFromFile("data/cv.npz", n_components=n_components, method="CV")
     clfs = [
         sl.ensembles.OnlineBagging(GaussianNB(), n_estimators=5),
-        sl.ensembles.OnlineBagging(SampleWeightedMetaEstimator(MLPClassifier(random_state=1410), n_estimators=5)),
+        sl.ensembles.OnlineBagging(
+            SampleWeightedMetaEstimator(MLPClassifier(random_state=1410)),
+            n_estimators=5,
+        ),
         sl.ensembles.OnlineBagging(HoeffdingTree(), n_estimators=5),
     ]
     eval = sl.evaluators.TestThenTrain(metrics=(accuracy_score))
@@ -173,10 +180,12 @@ for n_components in used_features:
     """
     plt.figure()
     stream = StreamFromFile("data/cv.npz", n_components=n_components, method="FS")
-
     clfs = [
         sl.ensembles.OnlineBagging(GaussianNB(), n_estimators=5),
-        sl.ensembles.OnlineBagging(SampleWeightedMetaEstimator(MLPClassifier(random_state=1410), n_estimators=5)),
+        sl.ensembles.OnlineBagging(
+            SampleWeightedMetaEstimator(MLPClassifier(random_state=1410)),
+            n_estimators=5,
+        ),
         sl.ensembles.OnlineBagging(HoeffdingTree(), n_estimators=5),
     ]
     eval = sl.evaluators.TestThenTrain(metrics=(accuracy_score))
