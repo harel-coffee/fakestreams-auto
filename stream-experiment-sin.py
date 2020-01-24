@@ -83,13 +83,15 @@ class StreamFromFile:
 used_features = [2, 10, 50, 100, 200, 500, 1000]
 
 for n_components in used_features:
-    # PCA
+    """
+    PCA
+    """
     plt.figure()
     stream = StreamFromFile("data/cv.npz", n_components=n_components, method="PCA")
     clfs = [
-        sl.ensembles.SEA(GaussianNB(), n_estimators=5),
-        sl.ensembles.SEA(MLPClassifier(random_state=1410), n_estimators=5),
-        sl.ensembles.SEA(HoeffdingTree(), n_estimators=5),
+        GaussianNB(),
+        MLPClassifier(random_state=1410),
+        HoeffdingTree(),
     ]
     eval = sl.evaluators.TestThenTrain(metrics=(accuracy_score))
     eval.process(stream, clfs)
@@ -116,20 +118,22 @@ for n_components in used_features:
     )
 
     plt.ylim(0, 1)
-    plt.title("PCA - %i" % n_components)
+    plt.title("SIN-PCA - %i" % n_components)
 
-    plt.savefig("figures/PCA_%i" % (n_components))
+    plt.savefig("figures/SIN-PCA_%i" % (n_components))
     plt.savefig("foo")
 
-    np.save("results/PCA_%i" % (n_components), eval.scores)
+    np.save("results/SIN-PCA_%i" % (n_components), eval.scores)
 
-    # CV
+    """
+    CV
+    """
     plt.figure()
     stream = StreamFromFile("data/cv.npz", n_components=n_components, method="CV")
     clfs = [
-        sl.ensembles.SEA(GaussianNB(), n_estimators=5),
-        sl.ensembles.SEA(MLPClassifier(random_state=1410), n_estimators=5),
-        sl.ensembles.SEA(HoeffdingTree(), n_estimators=5),
+        GaussianNB(),
+        MLPClassifier(random_state=1410),
+        HoeffdingTree(),
     ]
     eval = sl.evaluators.TestThenTrain(metrics=(accuracy_score))
     eval.process(stream, clfs)
@@ -156,21 +160,23 @@ for n_components in used_features:
     )
 
     plt.ylim(0, 1)
-    plt.title("CV - %i" % n_components)
+    plt.title("SIN - CV - %i" % n_components)
 
-    plt.savefig("figures/CV_%i" % (n_components))
+    plt.savefig("figures/SIN-CV_%i" % (n_components))
     plt.savefig("bar")
 
-    np.save("results/CV_%i" % (n_components), eval.scores)
+    np.save("results/SIN-CV_%i" % (n_components), eval.scores)
     plt.clf()
 
-    # Feature selection
+    """
+    Feature selection
+    """
     plt.figure()
     stream = StreamFromFile("data/cv.npz", n_components=n_components, method="FS")
     clfs = [
-        sl.ensembles.SEA(GaussianNB(), n_estimators=5),
-        sl.ensembles.SEA(MLPClassifier(random_state=1410), n_estimators=5),
-        sl.ensembles.SEA(HoeffdingTree(), n_estimators=5),
+        GaussianNB(),
+        MLPClassifier(random_state=1410),
+        HoeffdingTree(),
     ]
     eval = sl.evaluators.TestThenTrain(metrics=(accuracy_score))
     eval.process(stream, clfs)
@@ -197,10 +203,10 @@ for n_components in used_features:
     )
 
     plt.ylim(0, 1)
-    plt.title("FS - %i" % n_components)
+    plt.title("SIN-FS - %i" % n_components)
 
-    plt.savefig("figures/FS_%i" % (n_components))
+    plt.savefig("figures/SIN-FS_%i" % (n_components))
     plt.savefig("baz")
 
-    np.save("results/FS_%i" % (n_components), eval.scores)
+    np.save("results/SIN-FS_%i" % (n_components), eval.scores)
     plt.clf()
