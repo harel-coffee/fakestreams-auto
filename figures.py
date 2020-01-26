@@ -21,11 +21,11 @@ for method in methods:
         for n_components in used_features:
             selected_scores = np.load('results/%s-%s_%i.npy' %
                               (method, reduction, n_components))
-            print("%s-%s-%i" % (method, reduction, n_components))
+            print("%s_%s_%i" % (method, reduction, n_components))
 
             mean_scores = np.mean(selected_scores, axis=1)
 
-            fig = plt.figure(figsize=(4, 4))
+            fig = plt.figure(figsize=(4, 2.2))
             ax = plt.axes()
             for z, (value, label, mean) in enumerate(
                 zip(np.squeeze(selected_scores), methods, mean_scores)):
@@ -35,7 +35,7 @@ for method in methods:
 
             ax.legend(
                 loc=8,
-                # bbox_to_anchor=(0.5, -0.1),
+                bbox_to_anchor=(0.5, -0.05),
                 fancybox=False,
                 shadow=True,
                 ncol=3,
@@ -50,16 +50,16 @@ for method in methods:
             axx.spines["top"].set_visible(False)
 
             plt.title(
-                "%s-%s_%i" % (method, reduction, n_components),
+                "%s_%s_%i" % (method, reduction, n_components),
                 fontfamily="serif",
                 y=1.04,
                 fontsize=8,
             )
-            plt.ylim(0.0, 1.0)
+            plt.ylim(0.3, 1.0)
             plt.xticks(fontfamily="serif")
             plt.yticks(fontfamily="serif")
             plt.ylabel("score", fontfamily="serif", fontsize=8)
             plt.xlabel("chunks", fontfamily="serif", fontsize=8)
             plt.tight_layout()
-            plt.savefig("figures/%s-%s_%i" % (method, reduction, n_components), bbox_inches='tight', dpi=250)
+            plt.savefig("figures/%s_%s_%i.eps" % (method, reduction, n_components), bbox_inches='tight')
             plt.close()
