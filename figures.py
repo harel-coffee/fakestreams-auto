@@ -28,7 +28,7 @@ for method in methods:
             fig = plt.figure(figsize=(4, 2.2))
             ax = plt.axes()
             for z, (value, label, mean) in enumerate(
-                zip(np.squeeze(selected_scores), methods, mean_scores)):
+                zip(np.squeeze(selected_scores), clfs, mean_scores)):
                 label += "\n{0:.3f}".format(mean[0])
                 val = gaussian_filter1d(value, sigma=2, mode="nearest")
                 plt.plot(val, label=label, c=colors[z], ls=ls[z], lw=lw[z])
