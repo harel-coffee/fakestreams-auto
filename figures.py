@@ -12,9 +12,12 @@ methods = ["OB", "SEA", "SIN"]
 reductions = ["CV", "FS", "PCA"]
 
 rcParams["font.family"] = "monospace"
-colors = [(0, 0, 0), (0, 0, 0.9), (0.9, 0, 0)]
-ls = ["-", "-", "-"]
+colors = [(0, 0, 0), (0, 0, 0), (0, 0, 0)]
+ls = ["-", "--", ":"]
 lw = [1, 1, 1, 1, 1]
+
+plt.rc('xtick',labelsize=8)
+plt.rc('ytick',labelsize=8)
 
 for method in methods:
     for reduction in reductions:
@@ -50,10 +53,10 @@ for method in methods:
             axx.spines["top"].set_visible(False)
 
             plt.title(
-                "%s_%s_%i" % (method, reduction, n_components),
+                "%i features" % (n_components),
                 fontfamily="serif",
                 y=1.04,
-                fontsize=8,
+                fontsize=12,
             )
             plt.ylim(0.3, 1.0)
             plt.xticks(fontfamily="serif")
@@ -61,5 +64,5 @@ for method in methods:
             plt.ylabel("score", fontfamily="serif", fontsize=8)
             plt.xlabel("chunks", fontfamily="serif", fontsize=8)
             plt.tight_layout()
-            plt.savefig("figures/%s_%s_%i.eps" % (method, reduction, n_components), bbox_inches='tight')
+            plt.savefig("figures/%s_%s_%i.png" % (method, reduction, n_components), bbox_inches='tight', dpi=250)
             plt.close()
